@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Form
 from fastapi.responses import JSONResponse,Response
 from schemas.schemas import User
+from fastapi.exceptions import HTTPException
 router  = APIRouter()
 fake_db = []
 fake_servers = [{"123": "server1"}, {"1234": "server2"}, {"12345": "server3"}]
@@ -18,8 +19,13 @@ async def register(
     print("Текущая база:", fake_db)
     
     return Response(status_code=204)
-
-@router.get('/servers')
+@router.get('/auth/login')
+async def authorize(username:str,password:str):
+    for user in fake_db:
+        if user.username == username and user.password == password:
+            return Response(status_code=204)
+    return HTTPException(detail='Not authorized',status_code=401)
+router.get('/servers')
 async def get_servs():
     return fake_servers
 
