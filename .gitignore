@@ -1,0 +1,6 @@
+backend/__pycache__
+backend/schemas/__pycache__
+backend/api/__pycache__
+alembic
+alembic.ini
+backend/.gitignore
