@@ -20,7 +20,7 @@ async def register(
     
     return Response(status_code=204)
 @router.get('/auth/login')
-async def authorize(username:str,password:str):
+async def authorize(username:str = Form(),password:str = Form()):
     for user in fake_db:
         if user.username == username and user.password == password:
             return Response(status_code=204)
