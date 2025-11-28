@@ -48,3 +48,5 @@ async def get_serv(id: str):
             val = i[k]
             return {"user_id": id, "user_server": val}
     raise HTTPException(status_code=404, detail="Server not found")
+
+# Перепишите эндпоинты для работы с базой данных

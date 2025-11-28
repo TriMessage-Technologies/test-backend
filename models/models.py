@@ -14,3 +14,5 @@ class User(Base):
     username: Mapped[str] = mapped_column(String(50), nullable=False)
     email: Mapped[str] = mapped_column(String(100), nullable=False)
     password: Mapped[str] = mapped_column(String(50), nullable=False)
+
+# Здесь нужно добавить поля для авторизации
