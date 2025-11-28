@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Form
-from fastapi.responses import JSONResponse,Response
+from fastapi.responses import JSONResponse, Response
 from fastapi.middleware.cors import CORSMiddleware
 from api.api import router
 
@@ -14,4 +14,3 @@ app.add_middleware(
     allow_headers=["*"]
 )
 app.include_router(router)
-
