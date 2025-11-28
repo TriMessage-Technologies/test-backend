@@ -4,3 +4,5 @@ backend/api/__pycache__
 alembic
 alembic.ini
 backend/.gitignore
+models/__pycache__
+schemas/__pycache__
