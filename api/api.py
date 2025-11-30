@@ -1,9 +1,13 @@
-from fastapi import APIRouter, Form, HTTPException
+from fastapi import APIRouter, Form
 from fastapi.responses import Response
+from fastapi.exceptions import HTTPException
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__)))
+from core.core import *
 from schemas.schemas import User
 
 router = APIRouter()
-fake_db = []
 fake_servers = [{"123": "server1"}, {"1234": "server2"}, {"12345": "server3"}]
 
 
@@ -21,21 +25,20 @@ async def register(
 
     # Регистрация пользователя
     user = User(username=username, password=password, email=email)
-    fake_db.append(user)
-    print("Текущая база:", fake_db)
-
+    await add_user(user=user)
+    
     return Response(status_code=204)
-
-
 @router.post('/auth/login')
-async def authorize(username: str = Form(...), password: str = Form(...)):
-    for user in fake_db:
-        if user.username == username and user.password == password:
+async def authorize(username:str = Form(),password:str = Form()):
+    try:
+        b = get_user(username=username,password=password)
+        if b:
             return Response(status_code=204)
-    raise HTTPException(status_code=401, detail='Not authorized')
-
-
-@router.get('/servers')
+        else:
+            return HTTPException(status_code=401,detail='not authorized')
+    except:
+        raise HTTPException(status_code=400,detail='something went wrong')
+router.get('/servers')
 async def get_servs():
     return fake_servers
 
@@ -48,5 +51,3 @@ async def get_serv(id: str):
             val = i[k]
             return {"user_id": id, "user_server": val}
     raise HTTPException(status_code=404, detail="Server not found")
-
-# Перепишите эндпоинты для работы с базой данных
