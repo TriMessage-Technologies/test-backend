@@ -1,9 +1,24 @@
-backend/__pycache__
-backend/schemas/__pycache__
-backend/api/__pycache__
 alembic
 alembic.ini
 backend/.gitignore
-models/__pycache__
-schemas/__pycache__
-__pycache__
+
+# Python cache files
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
