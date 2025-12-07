@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мини Фронтенд</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div id="auth-section">
+            <h2>Авторизация</h2>
+            <form id="login-form">
+                <input type="text" id="login-username" placeholder="Логин" required>
+                <input type="password" id="login-password" placeholder="Пароль" required>
+                <button type="submit">Войти</button>
+            </form>
+
+            <div class="divider">
+                <span>или</span>
+            </div>
+
+            <h2>Регистрация</h2>
+            <form id="register-form">
+                <input type="text" id="reg-username" placeholder="Логин" required>
+                <input type="email" id="reg-email" placeholder="Email" required>
+                <input type="password" id="reg-password" placeholder="Пароль" required>
+                <button type="submit">Зарегистрироваться</button>
+            </form>
+        </div>
+
+        <div id="servers-section" style="display: none;">
+            <h2>Серверы</h2>
+            <div id="servers-list"></div>
+            <button id="logout-btn">Выйти</button>
+        </div>
+
+        <div id="message" class="message"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

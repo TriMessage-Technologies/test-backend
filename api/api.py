@@ -1,14 +1,11 @@
 from fastapi import APIRouter, Form
 from fastapi.responses import Response
 from fastapi.exceptions import HTTPException
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__)))
-from core.core import *
 from schemas.schemas import User
 
 router = APIRouter()
 fake_servers = [{"123": "server1"}, {"1234": "server2"}, {"12345": "server3"}]
+fake_db = []
 
 
 @router.post('/auth/register')
@@ -23,22 +20,22 @@ async def register(
         if user.email == email:
             raise HTTPException(status_code=400, detail="Email already exists")
 
-    # Регистрация пользователя
     user = User(username=username, password=password, email=email)
-    await add_user(user=user)
-    
+    fake_db.append(user)
+
     return Response(status_code=204)
 @router.post('/auth/login')
 async def authorize(username:str = Form(),password:str = Form()):
     try:
-        b = get_user(username=username,password=password)
-        if b:
+        user = next((u for u in fake_db if u.username == username and u.password == password), None)
+        if user:
             return Response(status_code=204)
         else:
-            return HTTPException(status_code=401,detail='not authorized')
+            raise HTTPException(status_code=401,detail='not authorized')
     except:
         raise HTTPException(status_code=400,detail='something went wrong')
-router.get('/servers')
+
+@router.get('/servers')
 async def get_servs():
     return fake_servers
 
