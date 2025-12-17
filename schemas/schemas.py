@@ -6,4 +6,8 @@ class User(BaseModel):
     password: str
     email: str
 
-# Добавьте схемы для авторизации
+class CreateRoomRequest(BaseModel):
+    room_name: str
+    password: str = None  # опциональный пароль
+    max_users: int = 2
+

@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:8000'; // Измените на ваш порт FastAPI
+const API_BASE = 'http://0.0.0.0:8000'; // Измените на ваш порт FastAPI
 
 // DOM элементы
 const authSection = document.getElementById('auth-section');
@@ -133,7 +133,7 @@ registerForm.addEventListener('submit', async function(e) {
             showMessage(error.detail || 'Ошибка регистрации', 'error');
         }
     } catch (error) {
-        showMessage('Ошибка подключения', 'error');
+        showMessage('Ошибка подключения', error);
     }
 });
 
