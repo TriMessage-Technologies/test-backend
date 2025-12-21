@@ -1,43 +1,241 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мини Фронтенд</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chat Rooms</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      padding: 20px;
+    }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { text-align: center; margin: 20px 0; color: #1877f2; }
+    input, button, select {
+      padding: 10px;
+      margin: 10px 0;
+      width: 100%;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    button {
+      background: #1877f2;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover { background: #166fe5; }
+    .tab { display: none; }
+    .tab.active { display: block; }
+    .room {
+      background: white;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .logout { background: #e74c3c; }
+    .logout:hover { background: #c0392b; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div id="auth-section">
-            <h2>Авторизация</h2>
-            <form id="login-form">
-                <input type="text" id="login-username" placeholder="Логин" required>
-                <input type="password" id="login-password" placeholder="Пароль" required>
-                <button type="submit">Войти</button>
-            </form>
 
-            <div class="divider">
-                <span>или</span>
-            </div>
+<div class="container">
+  <h1>💬 Chat Rooms</h1>
 
-            <h2>Регистрация</h2>
-            <form id="register-form">
-                <input type="text" id="reg-username" name="username" placeholder="Логин" required>
-                <input type="email" id="reg-email" placeholder="Email" name="email" required>
-                <input type="password" id="reg-password" placeholder="Пароль" name="password" required>
-                <button type="submit">Зарегистрироваться</button>
-            </form>
-        </div>
-
-        <div id="servers-section" style="display: none;">
-            <h2>Серверы</h2>
-            <div id="servers-list"></div>
-            <button id="logout-btn">Выйти</button>
-        </div>
-
-        <div id="message" class="message"></div>
+  <!-- Auth -->
+  <div id="auth" class="tab active">
+    <div style="display:flex; gap:10px;">
+      <button onclick="showTab('login')">Войти</button>
+      <button onclick="showTab('register')">Регистрация</button>
     </div>
 
-    <script src="script.js"></script>
+    <form id="login" class="auth-form">
+      <input name="username" placeholder="Логин" required />
+      <input name="password" type="password" placeholder="Пароль" required />
+      <button type="submit">Войти</button>
+    </form>
+
+    <form id="register" class="auth-form" style="display:none;">
+      <input name="username" placeholder="Логин" required />
+      <input name="email" placeholder="Email" required />
+      <input name="password" type="password" placeholder="Пароль" required />
+      <button type="submit">Зарегистрироваться</button>
+    </form>
+  </div>
+
+  <!-- Main -->
+  <div id="main" class="tab" style="display:none;">
+    <div style="display:flex; justify-content:space-between;">
+      <h2>Комнаты</h2>
+      <button onclick="createRoom()" style="width:auto;">+ Создать</button>
+    </div>
+    <div id="rooms"></div>
+    <button onclick="logout()" class="logout" style="width:100%;margin-top:20px;">Выйти</button>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center;">
+    <div style="background:white; padding:20px; border-radius:10px; width:90%; max-width:400px;">
+      <h3>Создать комнату</h3>
+      <input id="roomName" placeholder="Название" />
+      <input id="roomPass" type="password" placeholder="Пароль (необязательно)" />
+      <select id="roomUsers">
+        <option value="2">2 пользователя</option>
+        <option value="4">4 пользователя</option>
+        <option value="8">8</option>
+      </select>
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <button onclick="closeModal()">Отмена</button>
+        <button onclick="doCreateRoom()">Создать</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = 'http://localhost:8000';
+
+  let user = null;
+
+  // Показать форму
+  function showTab(tab) {
+    document.querySelectorAll('.auth-form').forEach(f => f.style.display = 'none');
+    document.getElementById(tab).style.display = 'block';
+  }
+
+  // Авторизация
+  document.getElementById('login').onsubmit = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const data = new FormData(form);
+    const resp = await fetch(`${API}/api/login`, {
+      method: 'POST',
+      body: data
+    });
+    if (resp.ok) {
+      user = { username: data.get('username') };
+      localStorage.setItem('user', JSON.stringify(user));
+      loadMain();
+    } else {
+      alert('Ошибка входа');
+    }
+  };
+
+  // Регистрация
+  document.getElementById('register').onsubmit = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const data = new FormData(form);
+    const resp = await fetch(`${API}/api/register`, {
+      method: 'POST',
+      body: data
+    });
+    if (resp.ok) {
+      alert('Успешно зарегистрирован');
+      showTab('login');
+    } else {
+      alert('Ошибка регистрации');
+    }
+  };
+
+  // Загрузка главной
+  function loadMain() {
+    document.getElementById('auth').style.display = 'none';
+    document.getElementById('main').style.display = 'block';
+    loadRooms();
+  }
+
+  // Загрузить комнаты
+  async function loadRooms() {
+    const resp = await fetch(`${API}/api/rooms`);
+    const rooms = await resp.json();
+    const div = document.getElementById('rooms');
+    div.innerHTML = rooms.length ? '' : '<p>Нет комнат. Создайте первую!</p>';
+    rooms.forEach(r => {
+      const el = document.createElement('div');
+      el.className = 'room';
+      el.innerHTML = `
+        <strong>${r.name}</strong>
+        <p>Участников: ${r.current_users}/${r.max_users}</p>
+        <p>${r.has_password ? '🔒 Защищено' : '🔓 Открыто'}</p>
+        <button onclick="joinRoom('${r.id}', '${r.name}', ${r.has_password})">Войти</button>
+      `;
+      div.appendChild(el);
+    });
+  }
+
+  // Вход в комнату
+  async function joinRoom(id, name, needsPass) {
+    let password = null;
+    if (needsPass) {
+      password = prompt('Пароль:');
+      if (!password) return;
+    }
+
+    const resp = await fetch(`${API}/api/rooms/${id}/join`, {
+      method: 'POST',
+      body: new URLSearchParams({ username: user.username, password: password || '' })
+    });
+
+    if (resp.ok) {
+      alert(`Вы вошли в комнату "${name}"`);
+      loadRooms();
+    } else {
+      const err = await resp.json();
+      alert('Ошибка: ' + err.detail);
+    }
+  }
+
+  // Модальное окно
+  function createRoom() {
+    document.getElementById('modal').style.display = 'flex';
+  }
+  function closeModal() {
+    document.getElementById('modal').style.display = 'none';
+  }
+  async function doCreateRoom() {
+    const name = document.getElementById('roomName').value;
+    const pass = document.getElementById('roomPass').value;
+    const max = document.getElementById('roomUsers').value;
+
+    if (!name) return alert('Введите название!');
+
+    const resp = await fetch(`${API}/api/rooms/create`, {
+      method: 'POST',
+      body: new URLSearchParams({ room_name: name, password: pass, max_users: max })
+    });
+
+    if (resp.ok) {
+      closeModal();
+      loadRooms();
+    } else {
+      alert('Ошибка создания');
+    }
+  }
+
+  // Выход
+  function logout() {
+    if (confirm('Выйти?')) {
+      user = null;
+      localStorage.removeItem('user');
+      document.getElementById('main').style.display = 'none';
+      document.getElementById('auth').style.display = 'block';
+    }
+  }
+
+  // Авто-вход
+  window.onload = () => {
+    const saved = localStorage.getItem('user');
+    if (saved) {
+      user = JSON.parse(saved);
+      loadMain();
+    }
+  };
+</script>
+
 </body>
 </html>

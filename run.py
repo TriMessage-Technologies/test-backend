@@ -1,12 +1,12 @@
 import uvicorn
-from main import app
 
 if __name__ == "__main__":
-    print("🚀 Starting TriMessage Server....")
-    print("http://127.0.0.1:8000/")
+    print("http://localhost:8000")
+    print("=" * 50)
+
     uvicorn.run(
-        app,
+        "main:app",
         host="0.0.0.0",
         port=8000,
-        reload=False
+        reload=True
     )
